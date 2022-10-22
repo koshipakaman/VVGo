@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +12,13 @@ import (
 )
 
 func main() {
+
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, "Hello! GAE")
+	})
+
+	http.ListenAndServe(":8080", nil)
+
 	const TOKEN = "MTAzMzA1MzY2NjI4Mzg4MDQ3OA.G2mlWy.1c1jSavay6c1hxJEBym-AIwu3s3c9Yn8vQXXOA"
 	discord, err := discordgo.New("Bot " + TOKEN)
 
