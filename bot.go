@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,16 +12,15 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func main() {
+func run(token string) {
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(writer, "Hello! GAE")
 	})
 
-	http.ListenAndServe(":8080", nil)
+	go http.ListenAndServe(":8080", nil)
 
-	const TOKEN = "MTAzMzA1MzY2NjI4Mzg4MDQ3OA.G2mlWy.1c1jSavay6c1hxJEBym-AIwu3s3c9Yn8vQXXOA"
-	discord, err := discordgo.New("Bot " + TOKEN)
+	discord, err := discordgo.New("Bot " + token)
 
 	discord.AddHandler(onMessageCreate)
 
@@ -41,10 +41,29 @@ func main() {
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !m.Author.Bot {
-		_, err := s.ChannelMessageSend(m.ChannelID, "hello.")
+		_, err := s.ChannelMessageSend(m.ChannelID, "@"+m.Author.Username+"Hello.")
 		if err != nil {
 			log.Println("error: ", err)
 		}
 	}
 
+}
+
+func contains(strs []string, element string) bool {
+	for _, a := range strs {
+		if a == element {
+			return true
+		}
+	}
+	return false
+}
+
+func main() {
+
+	flag.Parse()
+	if contains(flag.Args(), "dev") {
+		run(os.Getenv("DEV_TOKEN"))
+	} else {
+		run(os.Getenv("TOKEN"))
+	}
 }

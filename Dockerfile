@@ -11,4 +11,4 @@ COPY *.go ./
 
 RUN go build -o vvgo
 
-CMD /vvg
+CMD ["./vvgo"]
