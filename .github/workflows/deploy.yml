@@ -4,8 +4,7 @@ on:
     branches: main
 
 env:
-  PROJECT_ID: ${{ secrets.GCE_PROJECT_ID }}
-  # GCE_SA_KEY: ${{ secrets.GCE_SA_KEY }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE: vvgo
   REGION: asia-northeast1
 
