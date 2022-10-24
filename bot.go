@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,14 +13,17 @@ import (
 
 func run(token string) {
 
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(writer, "dummy page for discord bot.")
-	})
+	/*
+		http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+			fmt.Fprintf(writer, "dummy page for discord bot.")
+		})
 
-	go http.ListenAndServe(":8080", nil)
+		go http.ListenAndServe(":8080", nil)
+	*/
 
 	discord, err := discordgo.New("Bot " + token)
 
+	discord.AddHandler(onVoiceUpdate)
 	discord.AddHandler(onMessageCreate)
 
 	err = discord.Open()
@@ -37,6 +39,18 @@ func run(token string) {
 	err = discord.Close()
 
 	return
+}
+
+func onVoiceUpdate(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
+
+	if v.BeforeUpdate == nil {
+		_, err := s.ChannelVoiceJoin(v.GuildID, v.ChannelID, false, false)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	// dgvoice.PlayAudioFile(vc)
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
