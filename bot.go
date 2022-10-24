@@ -15,7 +15,7 @@ import (
 func run(token string) {
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(writer, "Hello! GAE")
+		fmt.Fprintf(writer, "dummy page for discord bot.")
 	})
 
 	go http.ListenAndServe(":8080", nil)
@@ -40,8 +40,13 @@ func run(token string) {
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if !m.Author.Bot {
-		_, err := s.ChannelMessageSend(m.ChannelID, "@"+m.Author.Username+"Hello.")
+
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+	if userContains(m.Mentions, s.State.User) {
+
+		_, err := s.ChannelMessageSend(m.ChannelID, "ずんだもんはずんだの精なのだ。")
 		if err != nil {
 			log.Println("error: ", err)
 		}
@@ -49,9 +54,18 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 }
 
-func contains(strs []string, element string) bool {
-	for _, a := range strs {
+func contains[T comparable](s []T, element T) bool {
+	for _, a := range s {
 		if a == element {
+			return true
+		}
+	}
+	return false
+}
+
+func userContains(s []*discordgo.User, element *discordgo.User) bool {
+	for _, a := range s {
+		if a.String() == element.String() {
 			return true
 		}
 	}
