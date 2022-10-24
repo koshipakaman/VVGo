@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,13 +14,11 @@ import (
 
 func run(token string) {
 
-	/*
-		http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-			fmt.Fprintf(writer, "dummy page for discord bot.")
-		})
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, "dummy page for discord bot.")
+	})
 
-		go http.ListenAndServe(":8080", nil)
-	*/
+	go http.ListenAndServe(":8080", nil)
 
 	discord, err := discordgo.New("Bot " + token)
 
