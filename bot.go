@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
@@ -26,7 +28,7 @@ func run(token string) {
 	discord.AddHandler(onMessageCreate)
 	discord.AddHandler(onVoiceUpdate)
 
-	err = discord.Open()
+	discord.Open()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -41,37 +43,10 @@ func run(token string) {
 	return
 }
 
+var VOICEVOX_KEY = os.Getenv("VOICEVOX_KEY")
+
 func onVoiceUpdate(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
-
-	VOICEVOX_KEY := os.Getenv("VOICEVOX_KEY")
-	if v.BeforeUpdate == nil {
-		dgv, err := s.ChannelVoiceJoin(v.GuildID, v.ChannelID, false, false)
-		text := v.Member.User.Username + "が入室しました"
-		url := fmt.Sprintf("https://api.su-shiki.com/v2/voicevox/audio/?text=%s&key=%s&speaker=3&intonationScale=1&speed=1", text, VOICEVOX_KEY)
-		/*
-			res, err := http.Get(url)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer res.Body.Close()
-				out, err := os.Create("./temp")
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				defer out.Close()
-
-				_, err = io.Copy(out, res.Body)
-		*/
-		dgvoice.PlayAudioFile(dgv, url, make(chan bool))
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		dgv.Close()
-	}
+	// TODO
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -81,11 +56,38 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if userContains(m.Mentions, s.State.User) {
 
-		_, err := s.ChannelMessageSend(m.ChannelID, "ずんだもんはずんだの精なのだ。")
+		/*
+			_, errm := s.ChannelMessageSend(m.ChannelID, "ずんだもんはずんだの精なのだ。")
+			if errm != nil {
+				log.Println("error: ", errm)
+			}
+		*/
+
+		g, err := s.State.Guild(m.GuildID)
 		if err != nil {
 			log.Println("error: ", err)
 		}
+
+		for _, vs := range g.VoiceStates {
+			if vs.UserID == m.Author.ID {
+				vc, err := s.ChannelVoiceJoin(m.GuildID, vs.ChannelID, false, false)
+				if err != nil {
+					log.Println("error: ", err)
+				}
+
+				splited := strings.Split(m.Content, " ")
+				content := strings.Join(splited[1:], " ")
+
+				url := fmt.Sprintf("https://api.su-shiki.com/v2/voicevox/audio/?text=%s&key=%s&speaker=3&intonationScale=1&speed=1", content, VOICEVOX_KEY)
+				dgvoice.PlayAudioFile(vc, url, make(chan bool))
+				time.Sleep(time.Second * 1)
+				vc.Disconnect()
+			}
+		}
+
+		// text := v.Member.User.Username + "が入室しました"
 	}
+
 }
 
 func contains[T comparable](s []T, element T) bool {
