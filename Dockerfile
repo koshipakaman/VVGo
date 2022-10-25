@@ -11,5 +11,6 @@ RUN go build -o vvgo
 
 FROM alpine
 COPY --from=builder /build/vvgo /
+RUN apk update && apk add ffmpeg
 
 CMD ["/vvgo"]
