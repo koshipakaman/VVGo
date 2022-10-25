@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -22,8 +23,8 @@ func run(token string) {
 
 	discord, err := discordgo.New("Bot " + token)
 
-	discord.AddHandler(onVoiceUpdate)
 	discord.AddHandler(onMessageCreate)
+	discord.AddHandler(onVoiceUpdate)
 
 	err = discord.Open()
 	if err != nil {
@@ -42,14 +43,35 @@ func run(token string) {
 
 func onVoiceUpdate(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 
+	VOICEVOX_KEY := os.Getenv("VOICEVOX_KEY")
 	if v.BeforeUpdate == nil {
-		_, err := s.ChannelVoiceJoin(v.GuildID, v.ChannelID, false, false)
+		dgv, err := s.ChannelVoiceJoin(v.GuildID, v.ChannelID, false, false)
+		text := v.Member.User.Username + "が入室しました"
+		url := fmt.Sprintf("https://api.su-shiki.com/v2/voicevox/audio/?text=%s&key=%s&speaker=3&intonationScale=1&speed=1", text, VOICEVOX_KEY)
+		/*
+			res, err := http.Get(url)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer res.Body.Close()
+				out, err := os.Create("./temp")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				defer out.Close()
+
+				_, err = io.Copy(out, res.Body)
+		*/
+		dgvoice.PlayAudioFile(dgv, url, make(chan bool))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		dgv.Close()
 	}
-	// dgvoice.PlayAudioFile(vc)
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -64,7 +86,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			log.Println("error: ", err)
 		}
 	}
-
 }
 
 func contains[T comparable](s []T, element T) bool {
