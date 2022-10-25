@@ -56,13 +56,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if userContains(m.Mentions, s.State.User) {
 
-		/*
-			_, errm := s.ChannelMessageSend(m.ChannelID, "ずんだもんはずんだの精なのだ。")
-			if errm != nil {
-				log.Println("error: ", errm)
-			}
-		*/
-
 		g, err := s.State.Guild(m.GuildID)
 		if err != nil {
 			log.Println("error: ", err)
@@ -84,8 +77,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				vc.Disconnect()
 			}
 		}
-
-		// text := v.Member.User.Username + "が入室しました"
 	}
 
 }
