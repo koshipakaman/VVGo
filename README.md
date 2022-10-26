@@ -8,7 +8,7 @@ Github Actions でデプロイ．トリガーは main への push．
 
 # ローカル実行
 
-環境変数 DEV_TOKEN をセットし，以下を実行
+.env に`TOKEN`, `DEV_TOKEN`, `VOICEVOX_KEY`を設定する
 
 ```shell
 $ go run bot.go dev
