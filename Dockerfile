@@ -8,7 +8,7 @@ COPY *.go ./
 COPY scripts/out ./scripts/out
 RUN go mod download
 RUN apk update && apk add build-base
-RUN go build main.go handlers.go vocab.go 
+RUN go build main.go handlers.go vocab.go commands.go
 
 FROM alpine
 COPY --from=builder /build/main /

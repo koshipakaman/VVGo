@@ -17,6 +17,7 @@ func run(token string) {
 
 	discord.AddHandler(onMessageCreate)
 	discord.AddHandler(onVoiceUpdate)
+	discord.AddHandler(voiceChannelJoin)
 
 	discord.Open()
 	if err != nil {

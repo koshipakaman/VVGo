@@ -11,5 +11,7 @@ with open("out", "w") as f:
             tmp = striped[4:-5]
             tmp = re.sub('\d+_', '', tmp)
             tmp = re.sub('\.wav', '', tmp)
-            tmp = re.sub('\(*\)', '', tmp)
-            f.write(tmp + '\n')
+            tmp = re.sub('\(.*?\)', '', tmp)
+            tmp = re.sub('（.*?）', '', tmp)
+            if len(tmp) > 0:
+                f.write(tmp + '\n')

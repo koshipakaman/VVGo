@@ -38,6 +38,7 @@ func onVoiceUpdate(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 
 	if !join && len(voiceStateCache) == 1 {
 		voiceConnection.Disconnect()
+		delete(voiceStateCache, v.UserID)
 	}
 
 }
